@@ -3,7 +3,7 @@
 
 
 int check_increment_unsigned(uint32_t x) {
-    return x+1 > x;
+    return x + 1 > x;
 }
 
 

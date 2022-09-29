@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+  arm-debug:
+    build: .
+    volumes:
+    - "./:/home/shared"
+

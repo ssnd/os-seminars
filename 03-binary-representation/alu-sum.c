@@ -4,8 +4,9 @@
 
 typedef uint8_t byte;
 static inline ITYPE bitSum(byte a, byte b, int* carry) {
+    int old_carry = *carry;
     *carry = (a&b) | ((a^b) & (*carry));
-    return a^b^*carry;
+    return a^b^old_carry;
 }
 
 void sum(ITYPE first, ITYPE second, ITYPE *res, int* CF) {

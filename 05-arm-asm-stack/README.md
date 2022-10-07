@@ -124,7 +124,7 @@ Disassembly of section .text:
 
 А откуда линковщик знает какие символы надо подменять? Очень просто, `objdump --syms data-section.o`:
 
-Это покажет какие символы и где объявлены в программе. Соответственно, при помощи этой таблицы линковщик и догадывается в каких местах в программе нужно заменять  "нолики" на конкретные адреса.
+Команда покажет какие символы и где объявлены в программе. Соответственно, при помощи этой таблицы линковщик и догадывается в каких местах в программе нужно заменять  "нолики" на конкретные адреса.
 
 Ещё можно посмотреть на афигенную картинку, которая нам наглядно помогает понять как работает линковщик:  
 ![blabla](./static/linker.png)
@@ -235,6 +235,8 @@ https://topic.alibabacloud.com/a/the-difference-between-the-assembly-jump-instru
 
 ## x8 - структурки 
 > X8 is the indirect result register. This is used to pass the address location of an indirect result, for example, where a function returns a large structure.
+
+
 Чтобы посмотреть как это устроено, нужно скомпилить и посмотреть файл [`struct.c`](./struct.c)
 
 ## x18 

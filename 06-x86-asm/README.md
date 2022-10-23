@@ -122,6 +122,16 @@ sbb     DST, SRC        /* DST -= SRC - CF */
 
 Инструкции `test` и `cmp` не сохраняют результат, а только меняют флаги.
 
+# Про адресацию памяти
+Тырил у Яковлева:
+
+В отличии от RISC-процессоров, x86 позволяет использовать в качестве один из аргументов команды как адрес в памяти.
+
+В синтаксисе AT&T такая адресация записывается в виде: OFFSET(BASE, INDEX, SCALE), где OFFSET - это константа, BASE и INDEX - регистры, а SCALE - одно из значений: 1, 2, 4 или 8.
+
+Адрес в памяти вычисляется как OFFSET+BASE+INDEX*SCALE. Параметры OFFSET, INDEX и SCALE являются опциональными. При их отсутсвтвии подразумевается, что OFFSET=0, INDEX=0, SCALE равен размеру машинного слова.
+
+В синтаксисе Intel используется более очевидная нотация: [BASE + INDEX * SCALE + OFFSET].
 
 ## Семантика вызова функций
 
@@ -137,6 +147,9 @@ ret — opposite of call <=>
     pop address from the stack
     jump to that address
 ```
+## Выравнивание стека 
+Стек, как было упомянуто выше, должен быть выровнен по 16 байт. И когда мы с вами будем заниматься этим выравниванием, важно осознавать одну вещь: при вызове call на стек автоматически пушится адрес след инструкции. 
+То есть на стеке на момент когда нам нужно будет думать про выравнивание уже будет "заполнено" 8 байт.
 
 ## Пролог / эпилог (`enter` / `leave` инструкции)
 
@@ -155,7 +168,6 @@ leave <=>
     pop   %ebp
 ```
 
-
 ## `lea` & `mov`
 Логика загрузки значений/адресов  в х86 несколько отличается от того что мы видели в АРМе. Если у нас LDR загружал значения с адреса, а STR "сторил" значение по адресу, то тут мы используем инструкции LEA и MOV:  
 ```
@@ -164,7 +176,7 @@ LEA ax, [BP+SI+5] ; Compute address of value
 MOV ax, [BP+SI+5] ; Load value at that address
 ```
 
-Причём в работе с LEA есть некоторая неочевидность, которая задокументирована:
+Причём в работе с LEA+rip есть всякие неочевидные приёмчики:
 ```
 The x86-64 architecture adds an RIP (instruction pointer relative) addressing. This addressing mode is specified by using ‘rip’ as a base register. Only constant offsets are valid. For example:  
 AT&T: ‘1234(%rip)’, Intel: ‘[rip + 1234]’
@@ -178,9 +190,7 @@ AT&T: ‘symbol(%rip)’, Intel: ‘[rip + symbol]’
 
 Points to the symbol in RIP relative way, this is shorter than the default absolute addressing.
 ```
-Чуть более развёрнутый ответ: https://stackoverflow.com/questions/54745872/how-do-rip-relative-variable-references-like-rip-a-in-x86-64-gas-intel-sy
-
-Документация: https://stackoverflow.com/questions/54745872/how-do-rip-relative-variable-references-like-rip-a-in-x86-64-gas-intel-sy
+Чуть более развёрнутый ответ + ссылки на документацию: https://stackoverflow.com/questions/54745872/how-do-rip-relative-variable-references-like-rip-a-in-x86-64-gas-intel-sy
 
 Те, если нам надо подгрузить некоторый символ, мы это делаем при помощи `[rip+.the_label_we_want]` или `.the_label_we_want[rip]` и понимаем что ассемблер посчитает адрес нужного нам символа относительно текущей инструкции.
 
@@ -192,10 +202,10 @@ https://news.ycombinator.com/item?id=17343140
 Чтобы в этом помочь ассемблеру, мы должны явно сказать о каком размере речь идёт при помощи size directives (директивы размера..??). 
 
 Примеры: 
-```
-mov BYTE PTR [ebx], 2	; Move 2 into the single byte at the address stored in EBX.
-mov WORD PTR [ebx], 2	; Move the 16-bit integer representation of 2 into the 2 bytes starting at the address in EBX.
-mov DWORD PTR [ebx], 2    	; Move the 32-bit integer representation of 2 into the 4 bytes starting at the address in EBX.
+```asm
+mov BYTE PTR [rbx], 2; Move 2 into the single byte at the address stored in EBX.
+mov WORD PTR [rbx], 2; Move the 16-bit integer representation of 2 into the 2 bytes starting at the address in EBX.
+mov DWORD PTR [rbx], 2; Move the 32-bit integer representation of 2 into the 4 bytes starting at the address in EBX.
 ```
 
 Пример по работе с памятью (от Печатнова): см папочку `mem-access`
@@ -206,17 +216,17 @@ mov DWORD PTR [ebx], 2    	; Move the 32-bit integer representation of 2 into th
  * `.word` - 2 байта
  * `.long` - 4 байта
  * `.quad` - 8 байт (или 4 слова, что объясняет название)
+### endbrXX
+
+Статья на хабре https://habr.com/ru/post/494000/
+https://news.ycombinator.com/item?id=26061230
+https://windows-internals.com/cet-on-windows/
 
 
 ## Полезные ссылки для того чтобы быстро заботать х86 ассемблер
 https://www.cs.virginia.edu/~evans/cs216/guides/x86.html
 https://sourceware.org/binutils/docs/as/i386_002dMemory.html
-
 https://cs.brown.edu/courses/cs033/docs/guides/x64_cheatsheet.pdf
-
 https://docs.oracle.com/cd/E26502_01/html/E28388/eoiyg.html - описание всех директив x86
 
 
-
-\
-rsi, rdi - странные регистры для копирования массива, по сути регистры общего назначения, но ограниченные в возможностях. -?

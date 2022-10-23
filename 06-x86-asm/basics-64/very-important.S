@@ -8,9 +8,8 @@ very_important_function:
   push rbp
   push r12
   push r13
-  push r14
-  push r15
 
+  sub rsp, 16
   mov r12, rdi
   mov r13, 0
 
@@ -34,8 +33,7 @@ very_important_function:
     jmp LoopBegin
 
   LoopEnd:
-    pop r15
-    pop r14
+    add rsp, 16
     pop r13
     pop r12
     pop rbp

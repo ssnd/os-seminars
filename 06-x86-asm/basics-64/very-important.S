@@ -5,7 +5,6 @@
 .section .text
 
 very_important_function:
-  sub rsp, 16
   push rbp
   push r12
   push r13
@@ -40,7 +39,6 @@ very_important_function:
     pop r13
     pop r12
     pop rbp
-    add rsp, 16
 
   ret
 

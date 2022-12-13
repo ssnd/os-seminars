@@ -148,3 +148,35 @@ if (0 == fork) {
 
 Для того, чтобы случайно (в достаточно больших программах) не передать открытый файловый дескриптор новой программе, в системном вызове `open` предусмотрен флаг открытия `O_CLOEXEC`, который означает, что файл должен быть закрыт при вызове `exec`.
 
+
+
+<!-- 
+plan for 13.12
+- test?
+- fork, fork alternatives (vfork, clone), https://man7.org/linux/man-pages/man2/vfork.2.html https://man7.org/linux/man-pages/man2/clone.2.html
+- remote: fork debugging  https://sourceware.org/gdb/onlinedocs/gdb/Forks.html set follow-fork-mode child/parent 
+- fflush.c, (11-0.c)
+
+
+- exec syscall https://man7.org/linux/man-pages/man3/exec.3.html
+- exec-simple.c, exec-change-fd.c
+- 12-0.c
+- disown demo 
+
+bash long.sh & twice
+jobs
+echo $$
+# separate window
+kill -SIGHUP pid
+ps -o...
+
+ 
+bash long.sh
+ctrl+z
+fg/bg %1
+disown %1
+exit from shell
+kill -SIGHUP parent, see child in ps 
+
+# ^^ same with python program, suspend 
+-->

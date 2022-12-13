@@ -14,6 +14,7 @@ int main() {
         exit(0);
     } else {
         printf("parent process, mypid=%d, childpid=%d\n", getpid(), pid);
+        // 
         sleep(60);
     }
 }

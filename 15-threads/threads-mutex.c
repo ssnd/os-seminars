@@ -11,7 +11,7 @@ struct thread_arg_t {
 };
 
 void* thread_func(void * arg) {
-  struct thread_arg_t * thread_arg = (struct thread_arg_t * ) arg;
+  struct thread_arg_t * thread_arg = (struct thread_arg_t *) arg;
 
   pthread_mutex_lock(thread_arg->mutex);
   size_t thread_no = thread_arg->thread_no;
@@ -19,11 +19,10 @@ void* thread_func(void * arg) {
   double * doubles = thread_arg->doubles;
   size_t k = thread_arg->k;
 
-  for (size_t i = 0 ;i < N; ++i) {
-    doubles[(thread_no - 1 + k) % k] += .99;
-    doubles[thread_no] += 1;
-    doubles[(thread_no + 1) % k] += 1.01;
-  }
+  doubles[(thread_no - 1 + k) % k] += .99 * N;
+  doubles[thread_no] += 1 * N;
+  doubles[(thread_no + 1) % k] += 1.01 * N;
+
   pthread_mutex_unlock(thread_arg->mutex);
   return NULL;
 }
@@ -40,18 +39,26 @@ int main(int argc, char * argv[]) {
   pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
   struct thread_arg_t *thread_args = malloc(sizeof(struct thread_arg_t) * k);
-
+  int s;
   for (size_t i = 0; i < k; ++i) {
     thread_args[i].mutex = &mutex;
     thread_args[i].doubles = doubles;
     thread_args[i].thread_no = i;
     thread_args[i].k = k;
     thread_args[i].N = N;
-    pthread_create(&threads[i], NULL, thread_func, &thread_args[i]);
+    s = pthread_create(&threads[i], NULL, thread_func, &thread_args[i]);
+    if (s != 0) {
+      perror("pthread_create");
+      exit(1);
+    }
   }
 
   for (size_t i = 0; i < k; ++i ){
-    pthread_join(threads[i], NULL);
+    s = pthread_join(threads[i], NULL);
+    if (s != 0) {
+      perror("pthread_join");
+      exit(1);
+    }
   }
   for (size_t i = 0; i < k; ++i) {
     printf("%.10g\n", doubles[i]);

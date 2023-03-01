@@ -10,8 +10,18 @@ static void * thread_func(void * arg) {
     }
 
     pthread_t next_thread;
-    pthread_create(&next_thread, NULL, thread_func, 0);
-    pthread_join(next_thread, NULL);
+    int s;
+    s = pthread_create(&next_thread, NULL, thread_func, 0);
+    if (s != 0) {
+        perror("pthread_create");
+        exit(1);
+    }
+
+    s = pthread_join(next_thread, NULL);
+    if (s != 0) {
+        perror("pthread_join");
+        exit(1);
+    }
     printf("%d ", val);
     return NULL;
 }
@@ -19,8 +29,17 @@ static void * thread_func(void * arg) {
 
 int main() {
     pthread_t thread;
+    int s;
+    s = pthread_create(&thread, NULL, thread_func, 0);
+    if (s != 0) {
+        perror("pthread_create");
+        exit(1);
+    }
 
-    pthread_create(&thread, NULL, thread_func, 0);
-    pthread_join(thread, NULL);
+    s = pthread_join(thread, NULL);
+    if (s != 0) {
+        perror("pthread_join");
+        exit(1);
+    }
     return 0;
 }

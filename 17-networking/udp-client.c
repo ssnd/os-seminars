@@ -8,7 +8,12 @@
 #include <unistd.h>
 
 int main(int argc, char * argv[]) {
-	short port_num = strtol(argv[1], NULL, 10);
+	if (argc != 2) {
+		printf("usage: ./udp-client <port>\n");
+		exit(1);
+	}
+
+	int port_num = strtol(argv[1], NULL, 10);
 	int sock = socket(AF_INET, SOCK_DGRAM, 0);
 	if (-1 == sock) {
 		perror("socket");
@@ -22,7 +27,7 @@ int main(int argc, char * argv[]) {
 	};
 
 	int send_num, recv_num;
-	while (scanf("%d", &send_num) > 0) {
+	while (scanf("%d", &send_num) != EOF) {
 		sendto(sock, &send_num, sizeof(send_num), 0, (const struct sockaddr*)&addr, sizeof(addr));
 		recvfrom(sock, &recv_num, sizeof(recv_num), 0, NULL, NULL);
 		printf("%d\n", recv_num);
